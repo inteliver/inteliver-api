@@ -1,9 +1,7 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from loguru import logger
-import gradio as gr
 
-from app.interface import get_gr_interface
 from app.config import settings
 
 
