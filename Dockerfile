@@ -17,6 +17,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Stage 2: Production Stage
 FROM python:3.11-slim
 
+# Installing make
+RUN apt update && apt upgrade -y && apt install -y make
+
 # Set working directory in the container
 WORKDIR /app
 
