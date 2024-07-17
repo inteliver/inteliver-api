@@ -2,6 +2,13 @@
 
 
 
+## v0.1.2 (2024-07-17)
+
+### Fix
+
+* fix: tried to fix yaml structure ([`c2aac19`](https://gitlab.com/inteliver/inteliver-api/-/commit/c2aac19a6f41605a75443af0b8b49135162242f3))
+
+
 ## v0.1.1 (2024-07-17)
 
 ### Build
