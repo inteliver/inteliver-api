@@ -2,8 +2,6 @@ from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from loguru import logger
 
-from app.config import settings
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

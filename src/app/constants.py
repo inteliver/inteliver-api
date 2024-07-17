@@ -1,6 +1,6 @@
 SERVICE_DESCRIPTION = """
 # Inteliver API 🚀
-Welcome to the Inteliver API repository! 🤖 
+Welcome to the Inteliver API repository! 🤖
 
 ### GET `/version`
 
