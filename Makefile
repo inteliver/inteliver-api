@@ -15,9 +15,9 @@ sort-deps:
 dev:
 	export PYTHONPATH=`pwd`/src && uvicorn app.main:app --reload
 
-# Run the service using the cli command aiservice
+# Run the service using the cli command api-service
 run:
-	aiservice run
+	api-service run
 
 # Run mypy for type checking, Run flake8 for linting
 lint:

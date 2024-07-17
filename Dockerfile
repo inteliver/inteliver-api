@@ -27,8 +27,14 @@ COPY . .
 # Set the environment variable to use the virtual environment
 ENV PATH="/opt/venv/bin:$PATH"
 
+# install ai service
+RUN make install
+
 # Expose the port where the FastAPI app will run
 EXPOSE 8080
 
 # Command to run the FastAPI app using Uvicorn or other ASGI servers
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080"]
+# CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080"]
+
+# run the service using the cli
+CMD ["api-service", "run"]
