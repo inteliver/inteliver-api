@@ -23,7 +23,7 @@ dynamic = ["version"]
 # This is a one-line description or tagline of what your project does. This
 # corresponds to the "Summary" metadata field:
 # https://packaging.python.org/specifications/core-metadata/#summary
-description = "This template is designed for building AI services using FastAPI as the REST API server."  # Optional
+description = "This is the core inteliver api service."  # Optional
 
 # This is an optional longer description of your project that represents
 # the body of text which users will see when they visit PyPI.
@@ -58,14 +58,14 @@ keywords = ["ai", "service", "template", "api", "docker"]  # Optional
 # authored the project, and a valid email address corresponding to the name
 # listed.
 authors = [
-  {name = "A. Random Developer", email = "author@example.com" } # Optional
+  {name = "A. Lavasani", email = "amirm.lavasani@gmail.com" } # Optional
 ]
 
 # This should be your name or the names of the organization who currently
 # maintains the project, and a valid email address corresponding to the name
 # listed.
 maintainers = [
-  {name = "A. Great Maintainer", email = "maintainer@example.com" } # Optional
+  {name = "A. Lavasani", email = "amirm.lavasani@gmail.com" } # Optional
 ]
 
 # Classifiers help users find your project by categorizing it.
