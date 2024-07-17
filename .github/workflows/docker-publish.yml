@@ -25,16 +25,18 @@ jobs:
 
       - name: Extract version from tag
         id: get_version
-        run: echo "::set-output name=version::${GITHUB_REF/refs\/tags\//}"
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
 
       - name: Build and push Docker image
+        id: build
         uses: docker/build-push-action@v4
         with:
           context: .
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/${{ github.repository }}:${{ steps.get_version.outputs.version }}
+            ghcr.io/${{ github.repository_owner }}/${{ github.repository }}:${{ env.VERSION }}
             ghcr.io/${{ github.repository_owner }}/${{ github.repository }}:latest
 
       - name: Image digest
-        run: echo "Digest: ${{ steps.build-push.outputs.digest }}"
+        run: |
+            echo "Digest: ${{ steps.build.outputs.digest }}"
