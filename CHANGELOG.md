@@ -2,6 +2,13 @@
 
 
 
+## v0.1.4 (2024-07-17)
+
+### Style
+
+* style: chnage to a more cleaner docker image name ([`800841f`](https://gitlab.com/inteliver/inteliver-api/-/commit/800841f94be13ac3a05606583ce91f72cf30173c))
+
+
 ## v0.1.3 (2024-07-17)
 
 ### Fix
