@@ -4,7 +4,6 @@ from loguru import logger
 import gradio as gr
 
 from app.interface import get_gr_interface
-from app.utils.eureka import register_service, unregister_service
 from app.config import settings
 
 
@@ -23,11 +22,7 @@ async def on_startup(app: FastAPI):
         app (FastAPI): The FastAPI application instance.
     """
     logger.debug("Starting up the app...")
-    # Mount Gradio dev UI if configured
-    # Not working in this fashion
-    # await mount_gradio_ui(app)
-    # Register to service discovery if applicable
-    await register_service()
+    # Register to services that needs to be created on startup
     return app
 
 
@@ -39,23 +34,4 @@ async def on_shutdown(app: FastAPI) -> None:
         app (FastAPI): The FastAPI application instance.
     """
     logger.debug("Shutting down gracefully...")
-    # Unregister from service discovery if applicable
-    await unregister_service()
-
-
-def mount_gradio_ui(app: FastAPI) -> FastAPI:
-    """
-    Mounts the Gradio UI interface if enabled.
-
-    Args:
-        app (FastAPI): The FastAPI application instance.
-    """
-    if settings.gradio_interface_enable:
-        logger.debug("Gradio UI is enabled. Mounting Gradio interface app...")
-        app = gr.mount_gradio_app(
-            app,
-            get_gr_interface(),
-            path=settings.gradio_interface_url,
-        )
-        return app
-    return app
+    # Unregister any service that needs to be gracefully shut down

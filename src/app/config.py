@@ -22,11 +22,6 @@ class BaseAppSettings(BaseSettings):
 
     openapi_docs_url: str = Field("/docs", alias="CONFIG_FASTAPI_DOCS_URL")
     openapi_json_url: str = Field("/openapi.json", alias="CONFIG_FASTAPI_OPENAPI_URL")
-    gradio_interface_enable: bool = Field(True, alias="CONFIG_GRADIO_INTERFACE_ENABLE")
-    gradio_interface_url: str = Field("/ui", alias="CONFIG_GRADIO_INTERFACE_URL")
-
-    eureka_discovery_url: str = Field("127.0.0.1", alias="CONFIG_EUREKA_DISCOVERY_URL")
-    eureka_discovery_enable: bool = Field(False, alias="CONFIG_EUREKA_DISCOVERY_ENABLE")
 
 
 class DevelopmentSettings(BaseAppSettings):
@@ -41,7 +36,6 @@ class StagingSettings(BaseAppSettings):
     # default value in different running env settings
     # database_url: str = Field(..., env="STAGING_DB_URL")
     app_api_host: str = Field("0.0.0.0", alias="CONFIG_APP_API_HOST")
-    eureka_discovery_enable: bool = Field(True, alias="CONFIG_EUREKA_DISCOVERY_ENABLE")
 
 
 class ProductionSettings(BaseAppSettings):
@@ -49,7 +43,6 @@ class ProductionSettings(BaseAppSettings):
     # default value in different running env settings
     # database_url: str = Field(..., env="PROD_DB_URL")
     app_api_host: str = Field("0.0.0.0", alias="CONFIG_APP_API_HOST")
-    gradio_interface_enable: bool = Field(False, alias="CONFIG_GRADIO_INTERFACE_ENABLE")
 
 
 @lru_cache

@@ -75,7 +75,6 @@ git remote add origin http://172.31.112.27/ai-services/your-service-project.git
 - README.md
 - interface.py
 - main.py (docstring, fastapi, and root endpoint)
-- utils/eureka.py (app-name)
 
 search for `ai-service-template` to make sure you have renamed to your project name.
 
