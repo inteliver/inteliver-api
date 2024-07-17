@@ -2,6 +2,17 @@
 
 
 
+## v0.1.1 (2024-07-17)
+
+### Build
+
+* build: add actions for docker build and push ([`f3bc6d3`](https://gitlab.com/inteliver/inteliver-api/-/commit/f3bc6d3cd9eac3b988e7083bddfe70799ba7b041))
+
+### Fix
+
+* fix: linting issues ([`ce41094`](https://gitlab.com/inteliver/inteliver-api/-/commit/ce410941f3939265729c568469ac541cf29b2dd3))
+
+
 ## v0.1.0 (2024-07-17)
 
 ### Build
