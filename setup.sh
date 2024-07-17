@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# change ai-service-template to your service name
-conda create --name ai-service-template python=3.11 && source activate ai-service-template
+# change inteliver-api to your service name
+conda create --name inteliver-api python=3.11 && source activate inteliver-api
 
 make install-deps
 make install-dev-deps

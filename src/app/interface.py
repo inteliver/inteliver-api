@@ -5,9 +5,9 @@ import gradio as gr
 
 
 service_description = """
-# AI Service Template
+# Inteliver API
 
-Welcome to the AI Service Template repository! This template is designed for building AI services
+Welcome to the Inteliver API repository! This template is designed for building AI services
 using FastAPI as the REST API server, with Docker and docker-compose for containerization.
 
 ## Main Folders
@@ -38,7 +38,7 @@ def get_gr_interface():
         inputs=["text", "slider"],
         outputs=["text"],
         examples=[["Hello", 5], ["Hi", 2]],
-        title="AI Service Template",
+        title="Inteliver API",
         description=service_description,
         allow_flagging="never",
         flagging_dir=os.path.abspath("app/assets/flagged"),

@@ -10,7 +10,7 @@
 # There are some restrictions on what makes a valid project name
 # specification here:
 # https://packaging.python.org/specifications/core-metadata/#name
-name = "ai-service-template"  # Required
+name = "inteliver-api"  # Required
 
 # Versions should comply with PEP 440:
 # https://www.python.org/dev/peps/pep-0440/
@@ -108,7 +108,7 @@ dependencies = [ # Optional
 
 [tool.setuptools.dynamic]
 # change this into __version__ in derived services
-version = {attr = "app.version.__template_version__"}
+version = {attr = "app.version.__version__"}
 
 # List additional groups of dependencies here (e.g. development
 # dependencies). Users will be able to install these using the "extras"
@@ -174,7 +174,7 @@ logging_use_named_masks = false
 major_on_zero = true
 tag_format = "v{version}"
 # change this into __version__ in derived services
-version_variables = ["src/app/version.py:__template_version__"]
+version_variables = ["src/app/version.py:__version__"]
 build_command = "make all"
 
 [tool.semantic_release.branches.main]

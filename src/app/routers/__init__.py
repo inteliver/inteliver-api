@@ -11,7 +11,7 @@ from app.utils.i18n import _
 
 def register_routers(app: FastAPI):
     app.include_router(
-        version_router, prefix="/api/v1/ai-service-template", tags=["version"]
+        version_router, prefix="/api/v1/inteliver-api", tags=["version"]
     )
 
     # Root endpoint

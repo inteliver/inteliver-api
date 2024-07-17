@@ -1,6 +1,6 @@
-# AI Service Template
+# Inteliver API
 
-Welcome to the AI Service Template repository! This template is designed for building AI services using FastAPI as the REST API server, with Docker and docker-compose for containerization.
+Welcome to the Inteliver API repository! This template is designed for building AI services using FastAPI as the REST API server, with Docker and docker-compose for containerization.
 
 ## Main Folders
 

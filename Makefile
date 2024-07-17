@@ -33,14 +33,14 @@ summary:
 	pygount --suffix=py  --format=summary .
 
 # Build Docker image with the project name specified
-# Change ai-service-template to your project name
+# Change inteliver-api to your project name
 docker-build:
-	docker build -t ai-service-template:latest .
+	docker build -t inteliver-api:latest .
 
 # Run Docker container, mapping port 8080 from container to host
-# Change ai-service-template to your project name
+# Change inteliver-api to your project name
 docker-run:
-	docker run --rm -ti -p 8080:8080 ai-service-template:latest
+	docker run --rm -ti -p 8080:8080 inteliver-api:latest
 
 # Run semantic-release for versioning without VCS release
 version:
@@ -74,7 +74,7 @@ install:
 	pip install . --upgrade
 
 uninstall:
-	pip uninstall ai-service-template -y
+	pip uninstall inteliver-api -y
 
 # Run tests and write the coverage in html format
 testz:

@@ -7,6 +7,6 @@ client = TestClient(app)
 
 
 def test_root_main():
-    response = client.get("/api/v1/ai-service-template/version")
+    response = client.get("/api/v1/inteliver-api/version")
     assert response.status_code == 200
     assert response.json() == {"version": __version__}

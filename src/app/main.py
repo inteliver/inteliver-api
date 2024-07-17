@@ -1,5 +1,5 @@
 """
-    Main script of AI Service Template.
+    Main script of Inteliver API.
 
     This script setups the API server using FastAPI.
 
@@ -16,8 +16,8 @@ from app.utils.lifespan import mount_gradio_ui
 
 
 service_description = """
-# AI Service Template 🚀
-Welcome to the AI Service Template repository! 🤖 This template is designed for building AI services
+# Inteliver API 🚀
+Welcome to the Inteliver API repository! 🤖 This template is designed for building AI services
 using FastAPI as the REST API server, with Docker and docker-compose for containerization. 🐳
 
 ### GET `/version`
@@ -25,7 +25,7 @@ using FastAPI as the REST API server, with Docker and docker-compose for contain
 This endpoints return the version of the code.
 """
 
-service_title = "FastAPI AI Service Template"
+service_title = "FastAPI Inteliver API"
 service_summary = "This template is designed for building AI services using FastAPI as the REST API server"
 
 

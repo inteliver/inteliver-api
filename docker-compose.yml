@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   app:
-    image: ai-service-template:latest
+    image: inteliver-api:latest
     build:
       context: .
       dockerfile: Dockerfile

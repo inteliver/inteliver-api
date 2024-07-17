@@ -13,7 +13,7 @@ class AppEnvEnum(str, Enum):
 
 
 class BaseAppSettings(BaseSettings):
-    app_name: str = Field("ai-service-template", alias="CONFIG_APP_NAME")
+    app_name: str = Field("inteliver-api", alias="CONFIG_APP_NAME")
     app_api_host: str = Field("127.0.0.1", alias="CONFIG_APP_API_HOST")
     app_api_port: int = Field(8080, alias="CONFIG_APP_API_PORT")
     app_running_env: AppEnvEnum = Field(
