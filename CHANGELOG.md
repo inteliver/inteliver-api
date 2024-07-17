@@ -2,6 +2,13 @@
 
 
 
+## v0.1.3 (2024-07-17)
+
+### Fix
+
+* fix: add make package to dockerfile ([`119496a`](https://gitlab.com/inteliver/inteliver-api/-/commit/119496a07de46d9ccf6a0609f0e44f7cb32843a1))
+
+
 ## v0.1.2 (2024-07-17)
 
 ### Fix
