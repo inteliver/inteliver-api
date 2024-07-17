@@ -13,26 +13,14 @@ from app.version import __version__
 from app.config import settings
 from app.utils.middleware import LanguageMiddleware
 
-
-service_description = """
-# Inteliver API 🚀
-Welcome to the Inteliver API repository! 🤖 This template is designed for building AI services
-using FastAPI as the REST API server, with Docker and docker-compose for containerization. 🐳
-
-### GET `/version`
-
-This endpoints return the version of the code.
-"""
-
-service_title = "FastAPI Inteliver API"
-service_summary = "This template is designed for building AI services using FastAPI as the REST API server"
+from app.constants import SERVICE_DESCRIPTION, SERVICE_TITLE, SERVICE_SUMMARY
 
 
 app = FastAPI(
     lifespan=lifespan,
-    title=service_title,
-    summary=service_summary,
-    description=service_description,
+    title=SERVICE_TITLE,
+    summary=SERVICE_SUMMARY,
+    description=SERVICE_DESCRIPTION,
     version=__version__,
     docs_url=settings.openapi_docs_url,
     openapi_url=settings.openapi_json_url,
