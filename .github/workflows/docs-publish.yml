@@ -1,29 +1,27 @@
 name: ci
+
 on:
   push:
     branches:
       - master
       - main
+    paths:
+      - 'docs/**'
+      - 'mkdocs.yml'
+      - '.github/workflows/docs-publish.yml' # Ensure the workflow runs if changes are made to the workflow itself
+
 permissions:
   contents: write
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Check for Documentation Changes
-        id: check_docs
-        run: |
-          DOCS_CHANGED=$(git diff --name-only HEAD^ HEAD | grep '^docs/')
-          if [[ -n "$DOCS_CHANGED" ]] || [[ "$(git log -1 --pretty=%B)" == docs:* ]]; then
-            echo "docs_changed=true" >> $GITHUB_ENV
-          else
-            echo "docs_changed=false" >> $GITHUB_ENV
-          fi
       - name: Configure Git Credentials
         run: |
-          git config user.name github-actions[bot]
-          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
       - uses: actions/setup-python@v5
         with:
           python-version: 3.x
@@ -35,6 +33,4 @@ jobs:
           restore-keys: |
             mkdocs-material-
       - run: pip install mkdocs-material mkdocs-macros-plugin
-        if: env.docs_changed == 'true'
       - run: mkdocs gh-deploy --force
-        if: env.docs_changed == 'true'
