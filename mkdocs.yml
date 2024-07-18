@@ -1,0 +1,195 @@
+site_name: Inteliver
+site_description: inteliver is an opensource image management solution.
+site_url: https://docs.inteliver.com
+repo_name: inteliver-docs
+repo_url: https://github.com/inteliver/inteliver-docs
+# edit_uri: edit/main/docs/
+theme:
+  name: material
+  language: en
+  font:
+    text: Nunito
+    code: Roboto Mono
+  logo: assets/logo.svg
+  favicon: assets/favicon.ico
+  icon:
+    repo: fontawesome/brands/git-alt
+    annotation: material/plus-circle
+    # edit: material/pencil 
+    # view: material/eye
+  palette:
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: light blue
+      accent: amber
+
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: light blue
+      accent: amber
+
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  features:
+    - search.suggest
+    - search.highlight
+    - navigation.indexes
+    - navigation.path
+    - navigation.path
+    - navigation.top
+    - navigation.footer
+    - content.tabs.link
+    - content.tooltips
+    - content.code.annotate
+    - content.code.copy
+    - content.code.select
+    - content.action.edit
+    - toc.follow
+    # - toc.integrate
+    # - navigation.tabs
+    # - navigation.expand
+
+nav:
+  - Introduction:
+    - index.md
+    - introduction/features.md
+    - introduction/architecture.md
+
+  - Getting Started:
+    - getting-started/index.md
+    - getting-started/installation.md
+    - getting-started/how-inteliver-works.md
+    - getting-started/integration.md
+    - getting-started/image-modification.md
+    - getting-started/image-compression.md
+    - getting-started/image-ai.md
+    - getting-started/inteliver-dashboard.md
+    - getting-started/usecases.md
+
+  - Libraries:
+    - libraries/index.md
+    - libraries/python.md
+    - libraries/javascript.md
+    - libraries/react.md
+    - libraries/golang.md
+
+  - Examples:
+    - examples/index.md
+    - examples/selection.md
+    - examples/operation.md
+    - examples/resize.md
+    - examples/crop.md
+    - examples/rotate.md
+    - examples/flip.md
+    - examples/blur.md
+    - examples/pixelate.md
+    - examples/sharpen.md
+    - examples/gray-scale.md
+    - examples/compression.md
+    - examples/object-detection.md
+    - examples/text-overlay.md
+
+  - API Reference:
+    - api-reference/index.md
+    - api-reference/selection.md
+    - api-reference/operation.md
+    - api-reference/resize.md
+    - api-reference/crop.md
+    - api-reference/rotate.md
+    - api-reference/flip.md
+    - api-reference/blur.md
+    - api-reference/pixelate.md
+    - api-reference/sharpen.md
+    - api-reference/gray-scale.md
+    - api-reference/text-overlay.md
+    - api-reference/compression.md
+    - api-reference/object-detection.md
+
+extra_css:
+  - stylesheets/extra.css
+
+plugins:
+  - search
+  - macros:
+      module_name: docs/env
+      # include_dir: docs
+      on_error_fail: true
+      on_undefined: keep
+
+extra:
+  consent:
+    title: Cookie consent
+    description: >- 
+      We use cookies to recognize your repeated visits and preferences, as well
+      as to measure the effectiveness of our documentation and whether users
+      find what they're searching for. With your consent, you're helping us to
+      make our documentation better.
+    cookies:
+      github: GitHub Analytics
+      google: Google Analytics
+    actions:
+      - accept
+      - manage
+  analytics:
+    provider: google
+    property: G-
+  social:
+  - icon: fontawesome/brands/github-alt
+    link: https://github.com/inteliver
+  - icon: fontawesome/brands/twitter
+    link: https://twitter.com/inteliver
+  - icon: fontawesome/brands/linkedin
+    link: https://www.linkedin.com/company/inteliver
+  - icon: fontawesome/brands/medium
+    link: https://medium.com/@amirm.lavasani
+  # version:
+  #   provider: mike
+copyright: >
+  Copyright &copy; 2018 - 2024 inteliver –
+  made with ❤️ by inteliver –
+  <a href="#__consent">Change cookie settings</a>
+
+markdown_extensions:
+
+  # Python Markdown
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - toc:
+      permalink: true
+
+  # Python Markdown Extensions
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format  
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
