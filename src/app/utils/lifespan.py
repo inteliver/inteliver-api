@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from loguru import logger
+from app.utils.postgres import init_db
 
 
 @asynccontextmanager
@@ -19,6 +20,7 @@ async def on_startup(app: FastAPI):
     """
     logger.debug("Starting up the app...")
     # Register to services that needs to be created on startup
+    await init_db()
     return app
 
 

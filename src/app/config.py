@@ -23,6 +23,10 @@ class BaseAppSettings(BaseSettings):
     openapi_docs_url: str = Field("/docs", alias="CONFIG_FASTAPI_DOCS_URL")
     openapi_json_url: str = Field("/openapi.json", alias="CONFIG_FASTAPI_OPENAPI_URL")
 
+    postgres_user: str = Field("postgres", "CONFIG_POSTGRES_USER")
+    postgres_password: str = Field("postgres", "CONFIG_POSTGRES_PASSWORD")
+    postgres_db: str = Field("inteliver", "CONFIG_POSTGRES_DB")
+
 
 class DevelopmentSettings(BaseAppSettings):
     # example of a database url that has different env variable names and
