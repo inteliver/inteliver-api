@@ -26,7 +26,7 @@ lint:
 
 # Generate HTML documentation using pdoc
 docz:
-	pdoc -f --html --output-dir code-docs --config show_source_code=False src/app/
+	pdoc -f --html --output-dir pdoc --config show_source_code=False src/app/
 
 # Generate code statistics using pygount
 summary:
