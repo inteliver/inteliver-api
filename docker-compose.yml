@@ -20,11 +20,13 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - inteliver_network
-
+    ports:
+      - "127.0.0.1:5432:5432"
 
 networks:
   inteliver_network:
     name: "inteliver-network"
+    driver: bridge
 
 volumes:
   postgres_data:

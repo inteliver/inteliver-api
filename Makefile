@@ -104,10 +104,16 @@ translate-compile:
 translate-update:
 	pybabel update -i src/app/translations/messages.pot -d src/app/translations
 
+revision:
+	alembic revision --autogenerate -m "alembic revision"
+
+# Migrate database to the latest alembic migration
+migrate:
+	alembic upgrade head
+
 all:      
 	$(MAKE) clean
 	$(MAKE) lint
-	$(MAKE) docz
 	$(MAKE) summary
 	$(MAKE) translate-compile
 	$(MAKE) install
