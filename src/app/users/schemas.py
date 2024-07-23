@@ -1,5 +1,7 @@
-from pydantic import BaseModel, EmailStr
 from typing import Optional
+from uuid import UUID
+
+from pydantic import BaseModel, EmailStr
 
 
 class UserCreate(BaseModel):
@@ -13,15 +15,23 @@ class UserCreate(BaseModel):
 
 
 class UserUpdate(BaseModel):
-    name: Optional[str]
-    cloud_name: Optional[str]
-    endpoint: Optional[str]
-    storage_limit: Optional[int]
-    transaction_limit: Optional[int]
+    name: str | None = None
+    cloud_name: str | None = None
+    endpoint: str | None = None
+    storage_limit: int | None = None
+    transaction_limit: int | None = None
+
+
+class UserPut(BaseModel):
+    name: str
+    cloud_name: str
+    endpoint: str
+    storage_limit: int
+    transaction_limit: int
 
 
 class UserOut(BaseModel):
-    uid: str
+    uid: UUID
     name: str
     email_username: str
     cloud_name: str
@@ -31,14 +41,9 @@ class UserOut(BaseModel):
     role: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class UserLogin(BaseModel):
     email_username: EmailStr
     password: str
-
-
-class Token(BaseModel):
-    access_token: str
-    token_type: str

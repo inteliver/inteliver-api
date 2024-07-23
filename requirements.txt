@@ -1,9 +1,15 @@
+alembic==1.13.2
 art==6.1
+asyncpg==0.29.0
 Babel==2.14.0
 colorama==0.4.6
 fastapi==0.109.1
 loguru==0.7.2
-pydantic==2.5.1
+passlib[bcrypt]==1.7.4
+psycopg2-binary==2.9.9
 pydantic-settings==2.2.1
-uvicorn==0.24.0.post1
+pydantic[email]==2.5.1
+python-jose[cryptography]==3.3.0
+sqlalchemy==2.0.31
 typer==0.12.3
+uvicorn==0.24.0.post1

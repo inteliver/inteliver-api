@@ -1,7 +1,9 @@
-from sqlalchemy import Column, String, Integer
-from sqlalchemy.dialects.postgresql import UUID
 import uuid
-from app.db.postgres import Base
+
+from sqlalchemy import Column, Integer, String
+from sqlalchemy.dialects.postgresql import UUID
+
+from app.database.postgres import Base
 
 
 class User(Base):

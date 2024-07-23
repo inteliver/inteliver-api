@@ -1,10 +1,6 @@
 SERVICE_DESCRIPTION = """
 # Inteliver API 🚀
-Welcome to the Inteliver API repository! 🤖
-
-### GET `/version`
-
-This endpoints return the version of the code.
+This is the core inteliver API service! 🤖
 """
 
 SERVICE_TITLE = "Inteliver API"
