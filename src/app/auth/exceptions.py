@@ -19,6 +19,11 @@ class PyJWTException(HTTPException):
         super().__init__(status_code=status.HTTP_401_UNAUTHORIZED, detail=detail)
 
 
+class NotEnoughPermissionException(HTTPException):
+    def __init__(self, detail: str = "Not enough permissions"):
+        super().__init__(status_code=status.HTTP_403_FORBIDDEN, detail=detail)
+
+
 class DatabaseException(HTTPException):
     def __init__(self, detail: str = "Database error"):
         super().__init__(

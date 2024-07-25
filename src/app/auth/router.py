@@ -1,13 +1,12 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi import APIRouter, Depends
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.exceptions import AuthenticationFailedException
-from app.auth.schemas import LoginForm, Token
+from app.auth.schemas import Token
 from app.auth.service import AuthService
-from app.config import settings
 from app.database.dependencies import get_db
 
 router = APIRouter()

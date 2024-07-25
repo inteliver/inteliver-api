@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta, timezone
 from typing import List, Optional
+from uuid import UUID
 
 import jwt
 from fastapi import Depends, HTTPException, Security, status
@@ -9,8 +10,12 @@ from passlib.context import CryptContext
 from pydantic import ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth.exceptions import ExpiredSignatureException, PyJWTException
-from app.auth.schemas import TokenData
+from app.auth.exceptions import (
+    ExpiredSignatureException,
+    NotEnoughPermissionException,
+    PyJWTException,
+)
+from app.auth.schemas import TokenData, TokenScope
 from app.config import settings
 from app.users.crud import UserCRUD
 from app.users.schemas import UserOut
@@ -112,7 +117,7 @@ class AuthService:
         return AuthService.decode_access_token(token)
 
     @classmethod
-    def has_role(cls, role: str):
+    def has_role(cls, role: TokenScope):
         """
         Role checker to verify the user's role.
 
@@ -129,13 +134,10 @@ class AuthService:
         def role_checker(
             current_user: TokenData = Security(cls.get_current_user),
         ):
-            if current_user.role == "admin":
+            if current_user.role == TokenScope.ADMIN:
                 return current_user
             if not role == current_user.role:
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="Not enough permissions",
-                )
+                raise NotEnoughPermissionException
             return current_user
 
         return role_checker
