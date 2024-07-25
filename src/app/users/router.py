@@ -4,6 +4,9 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import EmailStr
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.auth.exceptions import NotEnoughPermissionException
+from app.auth.schemas import TokenData, TokenScope
+from app.auth.service import AuthService
 from app.database.dependencies import get_db
 from app.users.exceptions import (
     DatabaseException,
@@ -12,11 +15,12 @@ from app.users.exceptions import (
 )
 from app.users.schemas import UserCreate, UserOut, UserPut, UserUpdate
 from app.users.service import UserService
+from app.users.utils import verify_user_id_claim, verify_username_email_claim
 
 router = APIRouter()
 
 
-@router.post("/", response_model=UserOut)
+@router.post("/", response_model=UserOut, status_code=status.HTTP_201_CREATED)
 async def create_new_user(user: UserCreate, db: AsyncSession = Depends(get_db)):
     """
     API endpoint route creating a new user.
@@ -46,6 +50,7 @@ async def create_new_user(user: UserCreate, db: AsyncSession = Depends(get_db)):
 async def get_user_by_id(
     user_id: UUID,
     db: AsyncSession = Depends(get_db),
+    current_user: TokenData = Depends(AuthService.has_role(TokenScope.USER)),
 ):
     """
     API endpoint route for getting a user info by user_id .
@@ -62,6 +67,8 @@ async def get_user_by_id(
         DatabaseException: If a database error occurs.
         HTTPException: If any other error occurs.
     """
+    if not verify_user_id_claim(user_id=user_id, token=current_user):
+        raise NotEnoughPermissionException
     try:
         return await UserService.get_user_by_id(db, user_id)
     except UserNotFoundException as e:
@@ -75,7 +82,11 @@ async def get_user_by_id(
 
 
 @router.get("/by-email/", response_model=UserOut)
-async def get_user_by_email(email: EmailStr, db: AsyncSession = Depends(get_db)):
+async def get_user_by_email(
+    email: EmailStr,
+    db: AsyncSession = Depends(get_db),
+    current_user: TokenData = Depends(AuthService.has_role(TokenScope.USER)),
+):
     """Get a user by email via a GET request.
 
     Args:
@@ -88,7 +99,10 @@ async def get_user_by_email(email: EmailStr, db: AsyncSession = Depends(get_db))
     Raises:
         UserNotFoundException: If the user with user_id not found.
         DatabaseException: If a database error occurs.
-        HTTPException: If any other error occurs."""
+        HTTPException: If any other error occurs.
+    """
+    if not verify_username_email_claim(username=email, token=current_user):
+        raise NotEnoughPermissionException
     try:
         return await UserService.get_user_by_email(db, email)
     except UserNotFoundException as e:
@@ -103,7 +117,10 @@ async def get_user_by_email(email: EmailStr, db: AsyncSession = Depends(get_db))
 
 @router.get("/", response_model=list[UserOut])
 async def get_all_users(
-    skip: int = 0, limit: int = 10, db: AsyncSession = Depends(get_db)
+    skip: int = 0,
+    limit: int = 10,
+    db: AsyncSession = Depends(get_db),
+    current_user: TokenData = Depends(AuthService.has_role(TokenScope.USER)),
 ):
     """
     Retrieve all users through the API endpoint with pagination.
@@ -133,7 +150,10 @@ async def get_all_users(
 
 @router.put("/{user_id}", response_model=UserOut)
 async def update_user_by_id(
-    user_id: UUID, user_put: UserPut, db: AsyncSession = Depends(get_db)
+    user_id: UUID,
+    user_put: UserPut,
+    db: AsyncSession = Depends(get_db),
+    current_user: TokenData = Depends(AuthService.has_role(TokenScope.USER)),
 ):
     """
     Update a user by ID via a PUT request.
@@ -151,6 +171,8 @@ async def update_user_by_id(
         DatabaseException: If a database error occurs.
         HTTPException: If the user is not found or any other error occurs.
     """
+    if not verify_user_id_claim(user_id=user_id, token=current_user):
+        raise NotEnoughPermissionException
     try:
         return await UserService.update_user(db, user_id, user_put)
     except UserNotFoundException as e:
@@ -165,7 +187,10 @@ async def update_user_by_id(
 
 @router.patch("/{user_id}", response_model=UserOut)
 async def patch_user_by_id(
-    user_id: UUID, user_update: UserUpdate, db: AsyncSession = Depends(get_db)
+    user_id: UUID,
+    user_update: UserUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user: TokenData = Depends(AuthService.has_role(TokenScope.USER)),
 ):
     """
     Patch a user by ID via a PATCH request.
@@ -183,6 +208,8 @@ async def patch_user_by_id(
         DatabaseException: If a database error occurs.
         HTTPException: If any other error occurs.
     """
+    if not verify_user_id_claim(user_id=user_id, token=current_user):
+        raise NotEnoughPermissionException
     try:
         return await UserService.patch_user(db, user_id, user_update)
     except UserNotFoundException as e:
@@ -196,7 +223,11 @@ async def patch_user_by_id(
 
 
 @router.delete("/{user_id}", response_model=UserOut)
-async def delete_user_by_id(user_id: UUID, db: AsyncSession = Depends(get_db)):
+async def delete_user_by_id(
+    user_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: TokenData = Depends(AuthService.has_role(TokenScope.USER)),
+):
     """Delete a user by ID via a DELETE request.
 
     Args:
@@ -211,6 +242,8 @@ async def delete_user_by_id(user_id: UUID, db: AsyncSession = Depends(get_db)):
         DatabaseException: If a database error occurs.
         HTTPException: If any other error occurs.
     """
+    if not verify_user_id_claim(user_id=user_id, token=current_user):
+        raise NotEnoughPermissionException
     try:
         deleted_user = await UserService.delete_user(db, user_id)
         return UserOut.model_validate(deleted_user)
