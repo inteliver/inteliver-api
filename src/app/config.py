@@ -27,6 +27,8 @@ class BaseAppSettings(BaseSettings):
     postgres_password: str = Field("postgres", alias="CONFIG_POSTGRES_PASSWORD")
     postgres_db: str = Field("inteliver", alias="CONFIG_POSTGRES_DB")
 
+    api_prefix: str = Field("/api/v1", alias="CONFIG_API_PREFIX")
+
 
 class DevelopmentSettings(BaseAppSettings):
     # example of a database url that has different env variable names and
