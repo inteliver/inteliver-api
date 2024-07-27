@@ -2,11 +2,11 @@ from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.auth.utils import get_password_hash
 from app.users.crud import UserCRUD
 from app.users.exceptions import UserNotFoundException
 from app.users.models import User
 from app.users.schemas import UserCreate, UserOut, UserPut, UserUpdate
-from app.users.utils import get_password_hash
 
 
 class UserService:
@@ -27,15 +27,8 @@ class UserService:
             DatabaseException: If a general database error occurs.
             ValidationError: If the database model could not be validated.
         """
-        db_user = User(
-            name=user.name,
-            email_username=user.email_username,
-            password=get_password_hash(user.password),
-            cloud_name=user.cloud_name,
-            endpoint=user.endpoint,
-            storage_limit=user.storage_limit,
-            transaction_limit=user.transaction_limit,
-        )
+        db_user = User(**user.model_dump())
+        db_user.password = get_password_hash(user.password)
         db_user = await UserCRUD.create_user(db, db_user)
         return UserOut.model_validate(db_user)
 
@@ -82,7 +75,7 @@ class UserService:
         db_user = await UserCRUD.get_user_by_email(db, email)
 
         if db_user is None:
-            raise UserNotFoundException(f"User with id {email} not found")
+            raise UserNotFoundException(f"User with email {email} not found")
 
         return UserOut.model_validate(db_user)
 

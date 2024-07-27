@@ -15,11 +15,9 @@ from .version_router import router as version_router
 
 
 def register_routers(app: FastAPI):
-    app.include_router(auth_router, prefix=f"{settings.api_prefix}/auth", tags=["Auth"])
+    app.include_router(auth_router, prefix=f"{settings.api_prefix}/auth")
 
-    app.include_router(
-        users_router, prefix=f"{settings.api_prefix}/users", tags=["Users"]
-    )
+    app.include_router(users_router, prefix=f"{settings.api_prefix}/users")
 
     app.include_router(
         version_router, prefix=f"{settings.api_prefix}/inteliver-api", tags=["version"]

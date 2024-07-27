@@ -209,3 +209,23 @@ class UserCRUD:
             return db_user
         except SQLAlchemyError as e:
             raise DatabaseException(detail=str(e))
+
+    @staticmethod
+    async def update_user_password(
+        db: AsyncSession, db_user: User, new_password_hashed: str
+    ) -> None:
+        """
+        Update the password of a user.
+
+        Args:
+            db (AsyncSession): The database session.
+            db_user (User): The user object db model.
+            new_password_hashed (str): The new hashed password.
+
+        Returns:
+            User: The updated user database model.
+        """
+        db_user.password = new_password_hashed
+        await db.commit()
+        await db.refresh(db_user)
+        return db_user

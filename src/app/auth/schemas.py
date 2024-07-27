@@ -1,13 +1,9 @@
-from enum import Enum
-from typing import List, Optional
+from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
-
-class TokenScope(str, Enum):
-    ADMIN = "admin"
-    USER = "user"
+from app.users.schemas import UserRole
 
 
 class Token(BaseModel):
@@ -17,9 +13,8 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     sub: UUID
-    role: TokenScope
+    role: UserRole
     username: str
-    # roles: List[str] = []
 
 
 class LoginForm(BaseModel):
@@ -30,3 +25,22 @@ class LoginForm(BaseModel):
 class OTPForm(BaseModel):
     username: str
     otp: str
+
+
+class PasswordChange(BaseModel):
+    current_password: str
+    new_password: str
+
+
+class PasswordResetRequest(BaseModel):
+    email: EmailStr
+
+
+class PasswordResetConfirm(BaseModel):
+    token: str
+    new_password: str
+
+
+class PasswordResetToken(BaseModel):
+    sub: UUID
+    exp: datetime

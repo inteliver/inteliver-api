@@ -5,22 +5,24 @@ from pydantic import EmailStr
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.exceptions import NotEnoughPermissionException
-from app.auth.schemas import TokenData, TokenScope
+from app.auth.schemas import TokenData
 from app.auth.service import AuthService
+from app.auth.utils import verify_user_id_claim, verify_username_email_claim
 from app.database.dependencies import get_db
 from app.users.exceptions import (
     DatabaseException,
     UserAlreadyExistsException,
     UserNotFoundException,
 )
-from app.users.schemas import UserCreate, UserOut, UserPut, UserUpdate
+from app.users.schemas import UserCreate, UserOut, UserPut, UserRole, UserUpdate
 from app.users.service import UserService
-from app.users.utils import verify_user_id_claim, verify_username_email_claim
 
 router = APIRouter()
 
 
-@router.post("/", response_model=UserOut, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/", response_model=UserOut, status_code=status.HTTP_201_CREATED, tags=["Users"]
+)
 async def create_new_user(user: UserCreate, db: AsyncSession = Depends(get_db)):
     """
     API endpoint route creating a new user.
@@ -46,11 +48,11 @@ async def create_new_user(user: UserCreate, db: AsyncSession = Depends(get_db)):
         )
 
 
-@router.get("/{user_id}", response_model=UserOut)
+@router.get("/{user_id}", response_model=UserOut, tags=["Users"])
 async def get_user_by_id(
     user_id: UUID,
     db: AsyncSession = Depends(get_db),
-    current_user: TokenData = Depends(AuthService.has_role(TokenScope.USER)),
+    current_user: TokenData = Depends(AuthService.has_role(UserRole.USER)),
 ):
     """
     API endpoint route for getting a user info by user_id .
@@ -81,11 +83,11 @@ async def get_user_by_id(
         )
 
 
-@router.get("/by-email/", response_model=UserOut)
+@router.get("/by-email/", response_model=UserOut, tags=["Users"])
 async def get_user_by_email(
     email: EmailStr,
     db: AsyncSession = Depends(get_db),
-    current_user: TokenData = Depends(AuthService.has_role(TokenScope.USER)),
+    current_user: TokenData = Depends(AuthService.has_role(UserRole.USER)),
 ):
     """Get a user by email via a GET request.
 
@@ -115,12 +117,12 @@ async def get_user_by_email(
         )
 
 
-@router.get("/", response_model=list[UserOut])
+@router.get("/", response_model=list[UserOut], tags=["Users"])
 async def get_all_users(
     skip: int = 0,
     limit: int = 10,
     db: AsyncSession = Depends(get_db),
-    current_user: TokenData = Depends(AuthService.has_role(TokenScope.USER)),
+    current_user: TokenData = Depends(AuthService.has_role(UserRole.ADMIN)),
 ):
     """
     Retrieve all users through the API endpoint with pagination.
@@ -148,12 +150,12 @@ async def get_all_users(
         )
 
 
-@router.put("/{user_id}", response_model=UserOut)
+@router.put("/{user_id}", response_model=UserOut, tags=["Users"])
 async def update_user_by_id(
     user_id: UUID,
     user_put: UserPut,
     db: AsyncSession = Depends(get_db),
-    current_user: TokenData = Depends(AuthService.has_role(TokenScope.USER)),
+    current_user: TokenData = Depends(AuthService.has_role(UserRole.USER)),
 ):
     """
     Update a user by ID via a PUT request.
@@ -185,12 +187,12 @@ async def update_user_by_id(
         )
 
 
-@router.patch("/{user_id}", response_model=UserOut)
+@router.patch("/{user_id}", response_model=UserOut, tags=["Users"])
 async def patch_user_by_id(
     user_id: UUID,
     user_update: UserUpdate,
     db: AsyncSession = Depends(get_db),
-    current_user: TokenData = Depends(AuthService.has_role(TokenScope.USER)),
+    current_user: TokenData = Depends(AuthService.has_role(UserRole.USER)),
 ):
     """
     Patch a user by ID via a PATCH request.
@@ -222,11 +224,11 @@ async def patch_user_by_id(
         )
 
 
-@router.delete("/{user_id}", response_model=UserOut)
+@router.delete("/{user_id}", response_model=UserOut, tags=["Users"])
 async def delete_user_by_id(
     user_id: UUID,
     db: AsyncSession = Depends(get_db),
-    current_user: TokenData = Depends(AuthService.has_role(TokenScope.USER)),
+    current_user: TokenData = Depends(AuthService.has_role(UserRole.USER)),
 ):
     """Delete a user by ID via a DELETE request.
 
@@ -245,12 +247,111 @@ async def delete_user_by_id(
     if not verify_user_id_claim(user_id=user_id, token=current_user):
         raise NotEnoughPermissionException
     try:
-        deleted_user = await UserService.delete_user(db, user_id)
-        return UserOut.model_validate(deleted_user)
+        return await UserService.delete_user(db, user_id)
     except UserNotFoundException as e:
-        raise e
+        raise
     except DatabaseException as e:
-        raise e
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
+        )
+
+
+@router.get("/profile/", response_model=UserOut, tags=["Profile"])
+async def get_current_profile(
+    db: AsyncSession = Depends(get_db),
+    current_user: TokenData = Depends(AuthService.has_role(UserRole.USER)),
+):
+    """
+    API endpoint route for getting a user profile based on the bearer token sub.
+
+    Args:
+        db (AsyncSession): The database session dependency.
+
+    Returns:
+        UserOut: The retrieved user data transfer object.
+
+    Raises:
+        UserNotFoundException: If the user with user_id not found.
+        DatabaseException: If a database error occurs.
+        HTTPException: If any other error occurs.
+    """
+    # TODO: forward the request to GET /user/{user_id} with current_user.sub
+
+    try:
+        return await UserService.get_user_by_id(db, current_user.sub)
+    except UserNotFoundException as e:
+        raise
+    except DatabaseException as e:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
+        )
+
+
+@router.patch("/profile/", response_model=UserOut, tags=["Profile"])
+async def patch_current_profile(
+    user_update: UserUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user: TokenData = Depends(AuthService.has_role(UserRole.USER)),
+):
+    """
+    Patch current user profile by ID based on the bearer token sub.
+
+    Args:
+        user_update (UserUpdate): The partial updated user information.
+        db (AsyncSession): The database session dependency.
+
+    Returns:
+        UserOut: The updated user data transfer object.
+
+    Raises:
+        UserNotFoundException: If the user does not exist.
+        DatabaseException: If a database error occurs.
+        HTTPException: If any other error occurs.
+    """
+    # TODO: forward the request to PATCH /user/{user_id} with current_user.sub
+
+    try:
+        return await UserService.patch_user(db, current_user.sub, user_update)
+    except UserNotFoundException as e:
+        raise
+    except DatabaseException as e:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
+        )
+
+
+@router.delete("/profile/", response_model=UserOut, tags=["Profile"])
+async def delete_current_profile(
+    db: AsyncSession = Depends(get_db),
+    current_user: TokenData = Depends(AuthService.has_role(UserRole.USER)),
+):
+    """Delete a user by ID based on the bearer token sub.
+
+    Args:
+        db (AsyncSession): The database session dependency.
+
+    Returns:
+        UserOut: The deleted user data transfer object.
+
+    Raises:
+        UserNotFoundException: If the user does not exist.
+        DatabaseException: If a database error occurs.
+        HTTPException: If any other error occurs.
+    """
+    # TODO: forward the request to DELETE /user/{user_id} with current_user.sub
+
+    try:
+        return await UserService.delete_user(db, current_user.sub)
+    except UserNotFoundException as e:
+        raise
+    except DatabaseException as e:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)

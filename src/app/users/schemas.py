@@ -1,47 +1,41 @@
-from typing import Optional
+from datetime import datetime
+from enum import Enum
 from uuid import UUID
 
 from pydantic import BaseModel, EmailStr
+
+
+class UserRole(str, Enum):
+    ADMIN = "admin"
+    USER = "user"
 
 
 class UserCreate(BaseModel):
     name: str
     email_username: EmailStr
     password: str
-    cloud_name: str
-    endpoint: str
-    storage_limit: int
-    transaction_limit: int
 
 
 class UserUpdate(BaseModel):
     name: str | None = None
-    cloud_name: str | None = None
-    endpoint: str | None = None
-    storage_limit: int | None = None
-    transaction_limit: int | None = None
 
 
 class UserPut(BaseModel):
     name: str
-    cloud_name: str
-    endpoint: str
-    storage_limit: int
-    transaction_limit: int
 
 
 class UserOut(BaseModel):
     uid: UUID
     name: str
     email_username: str
-    cloud_name: str
-    endpoint: str
-    storage_limit: int
-    transaction_limit: int
-    role: str
+    role: UserRole
+    created_at: datetime | None
+    updated_at: datetime | None
 
     class Config:
         from_attributes = True
+        # This will use the string values of the enums
+        use_enum_values = True
 
 
 class UserLogin(BaseModel):

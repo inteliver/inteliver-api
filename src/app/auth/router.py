@@ -1,18 +1,24 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Security
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.exceptions import AuthenticationFailedException
-from app.auth.schemas import Token
+from app.auth.schemas import (
+    PasswordChange,
+    PasswordResetConfirm,
+    PasswordResetRequest,
+    Token,
+    TokenData,
+)
 from app.auth.service import AuthService
 from app.database.dependencies import get_db
 
 router = APIRouter()
 
 
-@router.post("/login", response_model=Token)
+@router.post("/login", response_model=Token, tags=["Auth"])
 async def login(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     db: AsyncSession = Depends(get_db),
@@ -46,7 +52,33 @@ async def login(
     return Token(access_token=access_token, token_type="bearer")
 
 
-@router.post("/logout")
+@router.post("/refresh", response_model=Token, tags=["Auth"])
+async def refresh_token(token: str = Depends(AuthService.oauth2_scheme)):
+    """
+    Refresh the user's JWT token.
+
+    This endpoint takes the user's JWT token, validates it, and issues a new
+    token with updated expiration. It allows users to stay authenticated without
+    having to log in again frequently.
+
+    Args:
+        token (str): The JWT token provided by the user.
+
+    Returns:
+        dict: A new JWT token with updated expiration and the token type.
+    """
+    token_data = AuthService.decode_access_token(token)
+    new_token = AuthService.create_access_token(
+        data={
+            "sub": str(token_data.sub),
+            "username": token_data.username,
+            "role": token_data.role,
+        }
+    )
+    return Token(access_token=new_token, token_type="bearer")
+
+
+@router.post("/logout", tags=["Auth"])
 async def logout(token: str = Depends(AuthService.oauth2_scheme)):
     """
     Log out the user by invalidating their token.
@@ -72,27 +104,74 @@ async def logout(token: str = Depends(AuthService.oauth2_scheme)):
     return {"msg": "Successfully logged out"}
 
 
-@router.post("/refresh", response_model=Token)
-async def refresh_token(token: str = Depends(AuthService.oauth2_scheme)):
+@router.post("/change-password", tags=["Password"])
+async def change_password(
+    password_change: PasswordChange,
+    db: AsyncSession = Depends(get_db),
+    current_user: TokenData = Security(AuthService.get_current_user),
+):
     """
-    Refresh the user's JWT token.
+    Change the password of the current user.
 
-    This endpoint takes the user's JWT token, validates it, and issues a new
-    token with updated expiration. It allows users to stay authenticated without
-    having to log in again frequently.
+    This endpoint allows authenticated users to change their password.
+    Users must provide their current password and the new password.
 
     Args:
-        token (str): The JWT token provided by the user.
+        password_change (PasswordChange): Object containing current and new passwords.
+        current_user (TokenData): The current authenticated user.
+        db (AsyncSession): Database session dependency.
 
     Returns:
-        dict: A new JWT token with updated expiration and the token type.
+        dict: A message indicating successful password change.
+
+    Raises:
+        HTTPException: If the current password is incorrect.
     """
-    token_data = AuthService.decode_access_token(token)
-    new_token = AuthService.create_access_token(
-        data={
-            "sub": str(token_data.sub),
-            "username": token_data.username,
-            "role": token_data.role,
-        }
+    await AuthService.change_password(db, current_user.sub, password_change)
+    return {"msg": "Password changed successfully"}
+
+
+@router.post("/password-reset/request", tags=["Password"])
+async def request_password_reset(
+    password_reset_request: PasswordResetRequest, db: AsyncSession = Depends(get_db)
+):
+    """
+    Request a password reset by email.
+
+    This endpoint initiates the password reset process by sending a reset token
+    to the user's email address.
+
+    Args:
+        password_reset_request (PasswordResetRequest): Request containing the user's email.
+        db (AsyncSession): Database session dependency.
+
+    Returns:
+        dict: A message indicating that the reset email has been sent.
+    """
+    await AuthService.send_password_reset_email(db, password_reset_request.email)
+    return {"msg": "Password reset email sent"}
+
+
+@router.post("/password-reset/confirm", tags=["Password"])
+async def confirm_password_reset(
+    password_reset_confirm: PasswordResetConfirm, db: AsyncSession = Depends(get_db)
+):
+    """
+    Confirm the password reset with the token and set a new password.
+
+    This endpoint verifies the reset token and allows the user to set a new password.
+
+    Args:
+        password_reset_confirm (PasswordResetConfirm): Request containing the reset token and new password.
+        db (AsyncSession): Database session dependency.
+
+    Returns:
+        dict: A message indicating that the password has been reset successfully.
+
+    Raises:
+        HTTPException: If the reset token is invalid or expired.
+    """
+    await AuthService.reset_password(
+        db, password_reset_confirm.token, password_reset_confirm.new_password
     )
-    return Token(access_token=new_token, token_type="bearer")
+    return {"msg": "Password reset successfully"}
