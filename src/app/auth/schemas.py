@@ -44,3 +44,8 @@ class PasswordResetConfirm(BaseModel):
 class PasswordResetToken(BaseModel):
     sub: UUID
     exp: datetime
+
+
+class EmailValidationToken(BaseModel):
+    sub: UUID
+    exp: datetime

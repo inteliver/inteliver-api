@@ -29,3 +29,13 @@ class DatabaseException(HTTPException):
         super().__init__(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=detail
         )
+
+
+class TokenFieldsValidationException(HTTPException):
+    def __init__(self, detail: str = "Token fields validation failed"):
+        super().__init__(status_code=status.HTTP_401_UNAUTHORIZED, detail=detail)
+
+
+class EmailValidationTokenException(HTTPException):
+    def __init__(self, detail: str = "Invalid email validation token"):
+        super().__init__(status_code=status.HTTP_401_UNAUTHORIZED, detail=detail)

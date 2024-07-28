@@ -41,3 +41,12 @@ class UserOut(BaseModel):
 class UserLogin(BaseModel):
     email_username: EmailStr
     password: str
+
+
+class EmailValidation(BaseModel):
+    email_username: EmailStr
+    validation_token: str
+
+
+class EmailResendRequest(BaseModel):
+    email_username: EmailStr

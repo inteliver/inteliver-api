@@ -1,10 +1,10 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Security
+from fastapi import APIRouter, Depends, HTTPException, Security, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth.exceptions import AuthenticationFailedException
+from app.auth.exceptions import AuthenticationFailedException, DatabaseException
 from app.auth.schemas import (
     PasswordChange,
     PasswordResetConfirm,
@@ -14,6 +14,8 @@ from app.auth.schemas import (
 )
 from app.auth.service import AuthService
 from app.database.dependencies import get_db
+from app.users.exceptions import UserAlreadyExistsException
+from app.users.schemas import EmailResendRequest, EmailValidation, UserCreate, UserOut
 
 router = APIRouter()
 
@@ -175,3 +177,63 @@ async def confirm_password_reset(
         db, password_reset_confirm.token, password_reset_confirm.new_password
     )
     return {"msg": "Password reset successfully"}
+
+
+@router.post("/register", response_model=UserOut, tags=["Register"])
+async def register_user(user: UserCreate, db: AsyncSession = Depends(get_db)):
+    """
+    Register a new user and send a validation email.
+
+    Args:
+        user (UserCreate): The user creation schema.
+        db (AsyncSession): Database session dependency.
+
+    Returns:
+        UserOut: The created user details.
+    """
+    try:
+        return await AuthService.register_user(db, user)
+    except UserAlreadyExistsException as e:
+        raise
+    except DatabaseException as e:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
+        )
+
+
+@router.post("/register/validate", tags=["Register"])
+async def validate_email(
+    email_validation: EmailValidation, db: AsyncSession = Depends(get_db)
+):
+    """
+    Validate the user's email using the validation token.
+
+    Args:
+        email_validation (EmailValidation): The email validation schema.
+        db (AsyncSession): Database session dependency.
+
+    Returns:
+        dict: A message indicating the success of email validation.
+    """
+    await AuthService.validate_user_email(db, email_validation)
+    return {"msg": "Email successfully validated"}
+
+
+@router.post("/register/resend-validation", tags=["Register"])
+async def resend_validation_email(
+    email_resend: EmailResendRequest, db: AsyncSession = Depends(get_db)
+):
+    """
+    Resend the email validation token if an x amount of time has passed.
+
+    Args:
+        email_resend (EmailResendRequest): The email resend request schema.
+        db (AsyncSession): Database session dependency.
+
+    Returns:
+        dict: A message indicating the validation email has been resent.
+    """
+    await AuthService.resend_validation_email(db, email_resend)
+    return {"msg": "Validation email resent if the specified time has passed"}

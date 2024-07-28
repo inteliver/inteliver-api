@@ -1,5 +1,6 @@
 from uuid import UUID
 
+from loguru import logger
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -229,3 +230,17 @@ class UserCRUD:
         await db.commit()
         await db.refresh(db_user)
         return db_user
+
+    @staticmethod
+    async def validate_user_email(db: AsyncSession, user: User):
+        """
+        Validate the user's email.
+
+        Args:
+            db (AsyncSession): The database session.
+            user (User): The user object.
+        """
+        # TODO add active field to user and update it here
+        logger.debug("user is now activated")
+        # user.is_email_validated = True  # Assuming you have this field
+        # await db.commit()

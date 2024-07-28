@@ -203,3 +203,21 @@ semantic-release version --major --print
 semantic-release version --major --no-tag --no-vcs-release
 ```
 
+### Code Base Flow
+1. **Routers** 
+
+    are responsible for api endpoints routes. They handle input validation, authentication, authorization and other dependencies. 
+
+    They forward the request to **Service** layer and return the result or the formatted HTTP exception back to user.
+
+2. **Services**
+
+    are responsible for the logic of the endpoints. They process the user request and preform the logical steps required for handling the request.
+
+    They use the **CRUD** layer for any database related updates and return the result back to the routers layer for returning to the user.
+
+    It is best practice that services use other service layer when required to work with other modules. Do not use other modules CRUD layer in another service as much as possible.
+
+3. **CRUD**
+
+    are responsible for databse queries. They use an ORM (sqlalchemy) for connecting and updating the databse.

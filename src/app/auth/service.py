@@ -13,22 +13,38 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.exceptions import (
     AuthenticationFailedException,
+    DatabaseException,
+    EmailValidationTokenException,
     ExpiredSignatureException,
     NotEnoughPermissionException,
     PyJWTException,
+    TokenFieldsValidationException,
 )
-from app.auth.schemas import PasswordChange, PasswordResetToken, TokenData
+from app.auth.schemas import (
+    EmailValidationToken,
+    PasswordChange,
+    PasswordResetToken,
+    TokenData,
+)
 from app.auth.utils import get_password_hash, verify_password
 from app.config import settings
 from app.users.crud import UserCRUD
-from app.users.exceptions import UserNotFoundException
+from app.users.exceptions import UserAlreadyExistsException, UserNotFoundException
 from app.users.models import User
-from app.users.schemas import UserOut, UserRole
+from app.users.schemas import (
+    EmailResendRequest,
+    EmailValidation,
+    UserCreate,
+    UserOut,
+    UserRole,
+)
+from app.users.service import UserService
 
 SECRET_KEY = "your_secret_key"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30 * 24 * 60  # 1 month
-RESET_PASSWORD_EXPIRE_MINUTES = 60  # 1 hour
+RESET_PASSWORD_TOKEN_EXPIRE_MINUTES = 60  # 1 hour
+EMAIL_VALIDATION_TOKEN_EXPIRE_MINUTES = 60  # 1 hour
 
 
 class AuthService:
@@ -111,23 +127,6 @@ class AuthService:
         )
 
     @staticmethod
-    def create_password_reset_token(user: User) -> str:
-        """
-        Create a password reset token.
-
-        Args:
-            user (User): The user object.
-
-        Returns:
-            str: The encoded JWT token.
-        """
-        expire = datetime.now(timezone.utc) + timedelta(
-            minutes=RESET_PASSWORD_EXPIRE_MINUTES
-        )
-        to_encode = {"sub": str(user.uid), "exp": expire}
-        return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-
-    @staticmethod
     async def reset_password(db: AsyncSession, token: str, new_password: str) -> None:
         """
         Reset the user's password using a reset token.
@@ -144,26 +143,148 @@ class AuthService:
             HTTPException: If the token is invalid or expired.
         """
         try:
-            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            payload = AuthService.decode_jwt_token(token)
             token_data = PasswordResetToken(
                 sub=payload.get("sub"),
                 exp=payload.get("exp"),
             )
-        except jwt.ExpiredSignatureError:
-            raise ExpiredSignatureException
-        except jwt.PyJWTError:
-            raise PyJWTException
         except ValidationError:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Token fields validation failed",
-            )
+            raise TokenFieldsValidationException
 
         user = await UserCRUD.get_user_by_id(db, token_data.sub)
         if not user:
             raise UserNotFoundException(f"User with id {token_data.sub} not found")
 
         await UserCRUD.update_user_password(db, user, get_password_hash(new_password))
+
+    @staticmethod
+    async def register_user(db: AsyncSession, user: UserCreate) -> UserOut:
+        """
+        Register a new user and send a validation email.
+
+        Args:
+            db (AsyncSession): The database session.
+            user (UserCreate): The user creation schema.
+
+        Returns:
+            UserOut: The created user details.
+        """
+        # Create user if it is not already exist
+        try:
+            new_user = await UserService.create_user(db, user)
+        except UserAlreadyExistsException as e:
+            raise
+        except DatabaseException as e:
+            raise
+
+        # Create and log validation token
+        validation_token = AuthService.create_email_validation_token(new_user)
+        logger.debug(
+            f"Validation token created for user {new_user.email_username}: {validation_token}"
+        )
+
+        # Send validation email (implement send_email function accordingly)
+        await AuthService.send_validation_email(
+            new_user.email_username, validation_token
+        )
+
+        return UserOut.model_validate(new_user)
+
+    @staticmethod
+    async def validate_user_email(db: AsyncSession, email_validation: EmailValidation):
+        """
+        Validate the user's email using the validation token.
+
+        Args:
+            db (AsyncSession): The database session.
+            email_validation (EmailValidation): The email validation schema.
+        """
+        try:
+            payload = AuthService.decode_jwt_token(email_validation.validation_token)
+            token_data = EmailValidationToken(
+                sub=payload.get("sub"),
+                exp=payload.get("exp"),
+            )
+        except ValidationError:
+            raise TokenFieldsValidationException
+
+        user = await UserCRUD.get_user_by_email(db, email_validation.email_username)
+
+        if not user.uid == token_data.sub:
+            raise EmailValidationTokenException
+
+        await UserCRUD.validate_user_email(db, user)
+
+    @staticmethod
+    def create_email_validation_token(
+        user: UserOut,
+        expires_delta: Optional[timedelta] = timedelta(
+            minutes=EMAIL_VALIDATION_TOKEN_EXPIRE_MINUTES
+        ),
+    ) -> str:
+        """
+        Create a token for email validation.
+
+        Args:
+            user (UserOut): The user object.
+
+        Returns:
+            str: The encoded JWT token.
+        """
+        expire = datetime.now(timezone.utc) + expires_delta
+        to_encode = {"sub": str(user.uid), "exp": expire}
+        return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+    @staticmethod
+    async def resend_validation_email(
+        db: AsyncSession, email_resend: EmailResendRequest
+    ):
+        """
+        Resend the email validation token if an x amount of time has passed.
+
+        Args:
+            db (AsyncSession): The database session.
+            email_resend (EmailResendRequest): The email resend request schema.
+        """
+        user = await UserCRUD.get_user_by_email(db, email_resend.email_username)
+
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found",
+            )
+
+        # TODO Check if sufficient time has passed since the last validation email was sent
+        # Implement logic to determine if enough time has passed (e.g., 15 minutes)
+
+        # Create new validation token
+        validation_token = AuthService.create_email_validation_token(user)
+        logger.debug(
+            f"Validation token resent for user {user.email_username}: {validation_token}"
+        )
+
+        # Send validation email (implement send_email function accordingly)
+        await AuthService.send_validation_email(user.email_username, validation_token)
+
+    @staticmethod
+    def create_password_reset_token(
+        user: User,
+        expires_delta: Optional[timedelta] = timedelta(
+            minutes=RESET_PASSWORD_TOKEN_EXPIRE_MINUTES
+        ),
+    ) -> str:
+        """
+        Create a password reset token.
+
+        Args:
+            user (User): The user object.
+
+        Returns:
+            str: The encoded JWT token.
+        """
+        expire = datetime.now(timezone.utc) + expires_delta
+        to_encode = {"sub": str(user.uid), "exp": expire}
+        return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
     @staticmethod
     def create_access_token(
@@ -188,6 +309,29 @@ class AuthService:
         to_encode.update({"exp": expire})
         encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
         return encoded_jwt
+
+    @staticmethod
+    async def send_validation_email(email: str, token: str):
+        """
+        Send a validation email to the user.
+
+        Args:
+            email (str): The user's email address.
+            token (str): The validation token.
+        """
+        # Implement the logic to send an email containing the validation token
+        pass
+
+    @staticmethod
+    def decode_jwt_token(token: str) -> dict:
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        except jwt.ExpiredSignatureError:
+            raise ExpiredSignatureException
+        except jwt.PyJWTError:
+            raise PyJWTException
+
+        return payload
 
     @staticmethod
     def decode_access_token(token: str) -> TokenData:

@@ -23,7 +23,11 @@ router = APIRouter()
 @router.post(
     "/", response_model=UserOut, status_code=status.HTTP_201_CREATED, tags=["Users"]
 )
-async def create_new_user(user: UserCreate, db: AsyncSession = Depends(get_db)):
+async def create_new_user(
+    user: UserCreate,
+    db: AsyncSession = Depends(get_db),
+    current_user: TokenData = Depends(AuthService.has_role(UserRole.ADMIN)),
+):
     """
     API endpoint route creating a new user.
 
@@ -41,6 +45,8 @@ async def create_new_user(user: UserCreate, db: AsyncSession = Depends(get_db)):
     try:
         return await UserService.create_user(db, user)
     except UserAlreadyExistsException as e:
+        raise
+    except DatabaseException as e:
         raise
     except Exception as e:
         raise HTTPException(
