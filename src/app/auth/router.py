@@ -154,6 +154,7 @@ async def request_password_reset(
     return {"msg": "Password reset email sent"}
 
 
+# TODO: make this endpoint using GET method and magic link
 @router.post("/password-reset/confirm", tags=["Password"])
 async def confirm_password_reset(
     password_reset_confirm: PasswordResetConfirm, db: AsyncSession = Depends(get_db)
@@ -203,6 +204,7 @@ async def register_user(user: UserCreate, db: AsyncSession = Depends(get_db)):
         )
 
 
+# TODO: make this endpoint using GET method and magic link
 @router.post("/register/validate", tags=["Register"])
 async def validate_email(
     email_validation: EmailValidation, db: AsyncSession = Depends(get_db)

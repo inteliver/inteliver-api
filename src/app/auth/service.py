@@ -11,6 +11,13 @@ from passlib.context import CryptContext
 from pydantic import EmailStr, ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.auth.constants import (
+    ACCESS_TOKEN_EXPIRE_MINUTES,
+    ALGORITHM,
+    EMAIL_VALIDATION_TOKEN_EXPIRE_MINUTES,
+    RESET_PASSWORD_TOKEN_EXPIRE_MINUTES,
+    SECRET_KEY,
+)
 from app.auth.exceptions import (
     AuthenticationFailedException,
     DatabaseException,
@@ -39,12 +46,6 @@ from app.users.schemas import (
     UserRole,
 )
 from app.users.service import UserService
-
-SECRET_KEY = "your_secret_key"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30 * 24 * 60  # 1 month
-RESET_PASSWORD_TOKEN_EXPIRE_MINUTES = 60  # 1 hour
-EMAIL_VALIDATION_TOKEN_EXPIRE_MINUTES = 60  # 1 hour
 
 
 class AuthService:
