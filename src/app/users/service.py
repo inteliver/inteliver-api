@@ -3,6 +3,7 @@ from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.utils import get_password_hash
+from app.storage.exceptions import CludnameNotSetException
 from app.users.crud import UserCRUD
 from app.users.exceptions import UserNotFoundException
 from app.users.models import User
@@ -163,3 +164,11 @@ class UserService:
         """
         deleted_user = await UserCRUD.delete_user(db, user_id)
         return UserOut.model_validate(deleted_user)
+
+    @staticmethod
+    async def get_cloudname(db: AsyncSession, user_id: UUID) -> str:
+        # TODO create user storage info and retreive cloudname
+        cloudname = "inteliver"
+        if not cloudname:
+            raise CludnameNotSetException
+        return cloudname

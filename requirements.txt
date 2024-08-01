@@ -6,6 +6,7 @@ colorama==0.4.6
 fastapi==0.109.1
 loguru==0.7.2
 passlib[bcrypt]==1.7.4
+pillow==10.4.0
 psycopg2-binary==2.9.9
 pydantic-settings==2.2.1
 pydantic[email]==2.5.1

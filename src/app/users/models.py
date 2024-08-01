@@ -21,6 +21,7 @@ class User(Base):
     name = Column(String, nullable=False)
     email_username = Column(String, unique=True, nullable=False)
     password = Column(String, nullable=False)
+    cloudname = Column(String, nullable=False, default="inteliver")
     role = Column(String, nullable=False, default=str(UserRole.USER.value))
     created_at = Column(DateTime, default=lambda: datetime.now().replace(tzinfo=None))
     updated_at = Column(
