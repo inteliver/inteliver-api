@@ -1,10 +1,9 @@
 import typer
-from colorama import Fore, Style
 from art import text2art
+from colorama import Fore, Style
 
-from app.version import __version__, __template_version__
 from app.config import settings
-
+from app.version import __template_version__, __version__
 
 cli = typer.Typer()
 
@@ -14,7 +13,7 @@ def print_startup_logo():
     template_version_colored = (
         Fore.GREEN + Style.BRIGHT + "v" + __template_version__ + Style.RESET_ALL
     )
-    project_name = """.fastapi.\nstarter"""
+    project_name = """inteliver\n"""
     # other selected fonts
     # isometric1
     # alpha
