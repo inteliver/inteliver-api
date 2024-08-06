@@ -1,8 +1,7 @@
 from fastapi import APIRouter, status
 
-from app.schemas.version import Version
 from app.version import __version__
-
+from app.versioning.schemas import Version
 
 router = APIRouter()
 

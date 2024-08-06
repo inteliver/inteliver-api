@@ -8,14 +8,16 @@ from fastapi import FastAPI
 
 from app.auth.router import router as auth_router
 from app.config import settings
+from app.image.router import router as image_router
 from app.storage.router import router as storage_router
 from app.users.router import router as users_router
 from app.utils.i18n import _
-
-from .version_router import router as version_router
+from app.versioning.router import router as version_router
 
 
 def register_routers(app: FastAPI):
+    app.include_router(image_router, prefix=f"{settings.api_prefix}/image")
+
     app.include_router(storage_router, prefix=f"{settings.api_prefix}/storage")
 
     app.include_router(auth_router, prefix=f"{settings.api_prefix}/auth")
