@@ -241,6 +241,30 @@ class UserCRUD:
             user (User): The user object.
         """
         # TODO add active field to user and update it here
-        logger.debug("user is now activated")
-        # user.is_email_validated = True  # Assuming you have this field
+        logger.debug(
+            "user is now activated. TODO: add the activated field to user model"
+        )
+        # user.is_email_validated = True  # Assuming we have this field
         # await db.commit()
+
+    @staticmethod
+    async def get_cloudname(db: AsyncSession, user_id: UUID) -> str:
+        """Get the cloudname of a user by their user ID from the database.
+
+        Args:
+            db (AsyncSession): The database session.
+            user_id (UUID): The unique identifier of the user to retrieve.
+
+        Returns:
+            str: The cloudname of the user.
+
+        Raises:
+            UserNotFoundException: If the user does not exist.
+            DatabaseException: If a database error occurs.
+        """
+        try:
+            result = await db.execute(select(User.cloudname).filter_by(uid=user_id))
+            return result.scalar_one_or_none()
+
+        except SQLAlchemyError as e:
+            raise DatabaseException(detail=str(e))

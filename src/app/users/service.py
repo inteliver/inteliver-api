@@ -167,8 +167,7 @@ class UserService:
 
     @staticmethod
     async def get_cloudname(db: AsyncSession, user_id: UUID) -> str:
-        # TODO create user storage info and retreive cloudname
-        cloudname = "inteliver"
+        cloudname = await UserCRUD.get_cloudname(db, user_id)
         if not cloudname:
             raise CludnameNotSetException
         return cloudname
