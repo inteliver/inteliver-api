@@ -1,9 +1,9 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
-from loguru import logger
 
 from app.database.postgres import init_db
+from app.utils.logger import logger
 
 
 @asynccontextmanager
