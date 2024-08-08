@@ -26,7 +26,7 @@ class InvalidImageFileException(HTTPException):
 
 
 class S3ErrorException(HTTPException):
-    def __init__(self, detail: str = "Failed to upload the file to storage"):
+    def __init__(self, detail: str = "S3 object storage error occured"):
         super().__init__(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=detail,
