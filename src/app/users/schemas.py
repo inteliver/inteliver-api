@@ -13,6 +13,7 @@ class UserRole(str, Enum):
 class UserCreate(BaseModel):
     name: str
     email_username: EmailStr
+    cloudname: str
     password: str
 
 
@@ -28,14 +29,14 @@ class UserOut(BaseModel):
     uid: UUID
     name: str
     email_username: str
+    cloudname: str
     role: UserRole
+    email_activated: bool
     created_at: datetime | None
     updated_at: datetime | None
 
     class Config:
         from_attributes = True
-        # This will use the string values of the enums
-        use_enum_values = True
 
 
 class UserLogin(BaseModel):

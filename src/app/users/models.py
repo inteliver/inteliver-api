@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import Column, DateTime, String
+from sqlalchemy import Boolean, Column, DateTime, String
 from sqlalchemy.dialects.postgresql import UUID
 
 from app.database.postgres import Base
@@ -19,10 +19,11 @@ class User(Base):
         nullable=False,
     )
     name = Column(String, nullable=False)
+    cloudname = Column(String, unique=True, nullable=False)
     email_username = Column(String, unique=True, nullable=False)
     password = Column(String, nullable=False)
-    cloudname = Column(String, nullable=False, default="inteliver")
     role = Column(String, nullable=False, default=str(UserRole.USER.value))
+    email_activated = Column(Boolean, nullable=False, default=False)
     created_at = Column(DateTime, default=lambda: datetime.now().replace(tzinfo=None))
     updated_at = Column(
         DateTime,

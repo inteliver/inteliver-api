@@ -1,8 +1,8 @@
-"""Initial migration
+"""initial_migration
 
-Revision ID: 428c2f4bc071
+Revision ID: 4056a4a49e98
 Revises: 
-Create Date: 2024-07-22 12:31:43.913610
+Create Date: 2024-08-08 12:37:30.076419
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '428c2f4bc071'
+revision: str = '4056a4a49e98'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -23,14 +23,15 @@ def upgrade() -> None:
     op.create_table('users',
     sa.Column('uid', sa.UUID(), nullable=False),
     sa.Column('name', sa.String(), nullable=False),
+    sa.Column('cloudname', sa.String(), nullable=False),
     sa.Column('email_username', sa.String(), nullable=False),
     sa.Column('password', sa.String(), nullable=False),
-    sa.Column('cloud_name', sa.String(), nullable=False),
-    sa.Column('endpoint', sa.String(), nullable=False),
-    sa.Column('storage_limit', sa.Integer(), nullable=False),
-    sa.Column('transaction_limit', sa.Integer(), nullable=False),
     sa.Column('role', sa.String(), nullable=False),
+    sa.Column('email_activated', sa.Boolean(), nullable=False),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
+    sa.Column('updated_at', sa.DateTime(), nullable=True),
     sa.PrimaryKeyConstraint('uid'),
+    sa.UniqueConstraint('cloudname'),
     sa.UniqueConstraint('email_username'),
     sa.UniqueConstraint('uid')
     )
