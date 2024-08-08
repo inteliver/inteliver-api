@@ -5,17 +5,14 @@ from io import BytesIO
 from uuid import UUID
 
 from fastapi import UploadFile
-from fastapi.responses import StreamingResponse
 from loguru import logger
 from minio import Minio, S3Error
 from minio.datatypes import Object as MinioObject
 from PIL import Image
 from sqlalchemy.ext.asyncio import AsyncSession
-from urllib3 import BaseHTTPResponse
 
 # from app.storage.minio_client import minio_client
 from app.storage.exceptions import (
-    CludnameNotSetException,
     InvalidImageFileException,
     S3ErrorException,
     S3ErrorObjectNotFoundException,
@@ -57,7 +54,7 @@ class MinIOService:
         )
 
     @classmethod
-    def get_object(cls, bucket_name: str, object_name: str) -> BaseHTTPResponse:
+    def get_object(cls, bucket_name: str, object_name: str) -> tuple[BytesIO, dict]:
         """
         Retrieve an object from MinIO storage.
 
@@ -68,7 +65,18 @@ class MinIOService:
         Returns:
             BaseHTTPResponse: The retrieved object data.
         """
-        return cls.client.get_object(bucket_name, object_name)
+        try:
+            response = cls.client.get_object(bucket_name, object_name)
+            # read the data
+            data = response.data
+            headers = response.headers
+            # close and release connection
+            response.close()
+            response.release_conn()
+            return BytesIO(data), headers
+
+        except S3Error as e:
+            raise
 
     @classmethod
     def delete_object(cls, bucket_name: str, object_name: str):
@@ -168,7 +176,6 @@ class StorageService:
 
         # Step 4: Create a unique object name
         object_key = StorageService._generate_unique_key(mime_type)
-        logger.debug(object_key)
 
         # Step 5: Upload the file to MinIO
         try:
@@ -195,7 +202,7 @@ class StorageService:
         db: AsyncSession,
         uid: UUID,
         object_key: str,
-    ) -> StreamingResponse:
+    ) -> tuple[BytesIO, dict]:
         """
         Retrieve an image from the storage.
 
@@ -210,24 +217,34 @@ class StorageService:
         # Step 1: Get user's cloudname
         cloudname = await UserService.get_cloudname(db, uid)
 
-        # Step 2: Retrieve the object from MinIO and return a StreamingResponse
+        # Step 2: Retrieve the object from MinIO
+        return await StorageService.retrieve_image_by_cloudname(cloudname, object_key)
+
+    @staticmethod
+    async def retrieve_image_by_cloudname(
+        cloudname: str,
+        object_key: str,
+    ) -> tuple[BytesIO, dict]:
+        """
+        Retrieve an image from the storage by cloudname and object key.
+
+        Args:
+            cloudname (str): The cloudname of the user.
+            object_key (str): The key of the object to retrieve.
+
+        Returns:
+            Tuple[BytesIO, Dict[str, str]]: The retrieved object data and its headers.
+        """
         try:
-            response = MinIOService.get_object(
+            data, headers = MinIOService.get_object(
                 bucket_name=cloudname,
                 object_name=object_key,
             )
-            return StreamingResponse(
-                BytesIO(response.data),
-                headers=response.headers,
-            )
+            return data, headers
 
         except S3Error as e:
             logger.debug(f"MinIO S3Error: {str(e)}")
-            raise S3ErrorException
-
-        finally:
-            response.close()
-            response.release_conn()
+            raise S3ErrorObjectNotFoundException(detail=f"MinIO S3Error: {str(e)}")
 
     @staticmethod
     async def delete_image(

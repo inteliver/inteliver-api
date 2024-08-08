@@ -7,14 +7,12 @@
 
 from fastapi import FastAPI
 
+from app.config import settings
+from app.constants import SERVICE_DESCRIPTION, SERVICE_SUMMARY, SERVICE_TITLE
 from app.routers import register_routers
 from app.utils.lifespan import lifespan
-from app.version import __version__
-from app.config import settings
 from app.utils.middleware import LanguageMiddleware
-
-from app.constants import SERVICE_DESCRIPTION, SERVICE_TITLE, SERVICE_SUMMARY
-
+from app.version import __version__
 
 app = FastAPI(
     lifespan=lifespan,

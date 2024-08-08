@@ -1,5 +1,6 @@
 from uuid import UUID
 
+from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.utils import get_password_hash
@@ -77,6 +78,29 @@ class UserService:
 
         if db_user is None:
             raise UserNotFoundException(f"User with email {email} not found")
+
+        return UserOut.model_validate(db_user)
+
+    @staticmethod
+    async def get_user_by_cloudname(db: AsyncSession, cloudname: str) -> UserOut:
+        """Get a user by cloudname via the service layer.
+
+        Args:
+            db (AsyncSession): The database session.
+            cloudname (str): The cloudname of the user to retrieve.
+
+        Returns:
+            User: The user database model.
+
+        Raises:
+            UserNotFoundException: If the user does not exist.
+            DatabaseException: If a database error occurs.
+            ValidationError: If the database model could not be validated.
+        """
+        db_user = await UserCRUD.get_user_by_cloudname(db, cloudname)
+
+        if db_user is None:
+            raise UserNotFoundException(f"User with cloudname {cloudname} not found")
 
         return UserOut.model_validate(db_user)
 

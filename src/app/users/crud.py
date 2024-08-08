@@ -91,6 +91,28 @@ class UserCRUD:
             raise DatabaseException(detail=str(e))
 
     @staticmethod
+    async def get_user_by_cloudname(db: AsyncSession, cloudname: str) -> User:
+        """Get a user by cloudname from the database.
+
+        Args:
+            db (AsyncSession): The database session.
+            cloudname (str): The cloudname of the user to retrieve.
+
+        Returns:
+            User: The user database model.
+
+        Raises:
+            UserNotFoundException: If the user does not exist.
+            DatabaseException: If a database error occurs.
+        """
+        try:
+            result = await db.execute(select(User).filter_by(cloudname=cloudname))
+            return result.scalar_one_or_none()
+
+        except SQLAlchemyError as e:
+            raise DatabaseException(detail=str(e))
+
+    @staticmethod
     async def get_all_users(
         db: AsyncSession, skip: int = 0, limit: int = 10
     ) -> list[User]:
@@ -204,7 +226,7 @@ class UserCRUD:
 
             if db_user is None:
                 raise UserNotFoundException(f"User with id {user_id} not found")
-
+            # TODO: deleting cloudname storage space and data
             await db.delete(db_user)
             await db.commit()
             return db_user
@@ -244,8 +266,9 @@ class UserCRUD:
         logger.debug(
             "user is now activated. TODO: add the activated field to user model"
         )
-        # user.is_email_validated = True  # Assuming we have this field
-        # await db.commit()
+        user.email_activated = True
+        await db.commit()
+        await db.refresh(user)
 
     @staticmethod
     async def get_cloudname(db: AsyncSession, user_id: UUID) -> str:

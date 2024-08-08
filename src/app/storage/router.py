@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, UploadFile
 from fastapi.responses import StreamingResponse
+from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.schemas import TokenData
@@ -9,6 +10,12 @@ from app.storage.schemas import ObjectOut, ObjectStats, ObjectUploaded
 from app.storage.service import StorageService
 
 router = APIRouter()
+
+# TODO: routes should be sync (def) or the minio client should be async
+# currently an IO blocking operation (minio storage) is being executed in
+# an async def which will block the main loop.
+# functions should be sync (def) but currently they have a dependency on Postgre db
+# which is async.
 
 
 @router.post("/images", response_model=ObjectUploaded, tags=["Storage"])
@@ -67,7 +74,11 @@ async def retrieve_image(
     Returns:
         Any: The retrieved object data.
     """
-    return await StorageService.retrieve_image(db, current_user.sub, object_key)
+    data, headers = await StorageService.retrieve_image(
+        db, current_user.sub, object_key
+    )
+
+    return StreamingResponse(data, headers=headers)
 
 
 @router.delete("/images/{object_key}", tags=["Storage"])
