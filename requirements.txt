@@ -3,8 +3,11 @@ art==6.1
 asyncpg==0.29.0
 Babel==2.14.0
 colorama==0.4.6
+dlib==19.24.5
 fastapi==0.109.1
 loguru==0.7.2
+numpy==2.0.1
+opencv-python==4.10.0.84
 passlib[bcrypt]==1.7.4
 pillow==10.4.0
 psycopg2-binary==2.9.9
