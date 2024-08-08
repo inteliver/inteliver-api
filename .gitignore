@@ -183,3 +183,6 @@ pyrightconfig.json
 
 # dev logs
 logs
+
+# AI models
+src/app/assets/models
